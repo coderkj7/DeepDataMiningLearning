@@ -426,7 +426,7 @@ def main(args):
         if args.rpn_score_thresh is not None:
             kwargs["rpn_score_thresh"] = args.rpn_score_thresh
     
-    model, preprocess, model_classes = create_detectionmodel(args.model, num_classes, customize=args.nocustomize, trainable_layers=args.trainable)
+    model, preprocess, model_classes = create_detectionmodel(args.model, num_classes, nocustomize=args.nocustomize, trainable_layers=args.trainable)
     model.to(device)
     
     if args.distributed and args.sync_bn:
