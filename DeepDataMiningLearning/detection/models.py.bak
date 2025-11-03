@@ -205,7 +205,21 @@ def create_detectionmodel(modelname, num_classes=None, nocustomize=False, traina
             model = modify_fasterrcnnheader(model, num_classes, freeze=freezemodel)
         if ckpt_file:
             model = load_checkpoint(model, ckpt_file, fp16)
-        model.to(device)
+        if device == "cpu" or device.type == "cpu":
+    model.to("cpu")
+else:
+    try:
+        if device == "cpu" or device.type == "cpu":
+        model.to("cpu")
+else:
+        try:
+            model.to(device)
+        except:
+            print("Failed to move model to device:", device, "- falling back to CPU")
+            model.to("cpu")
+    except:
+        print("Failed to move model to device:", device, "- falling back to CPU")
+        model.to("cpu")
     elif modelname.startswith('customrcnn'):
         x = modelname.split("_")
         if x[0]== 'customrcnn' and x[1].startswith('resnet'):
@@ -215,7 +229,21 @@ def create_detectionmodel(modelname, num_classes=None, nocustomize=False, traina
                 model = load_checkpoint(model, ckpt_file, fp16)
         else:
             print("Model name not supported")
-        model.to(device)
+        if device == "cpu" or device.type == "cpu":
+    model.to("cpu")
+else:
+    try:
+        if device == "cpu" or device.type == "cpu":
+        model.to("cpu")
+else:
+        try:
+            model.to(device)
+        except:
+            print("Failed to move model to device:", device, "- falling back to CPU")
+            model.to("cpu")
+    except:
+        print("Failed to move model to device:", device, "- falling back to CPU")
+        model.to("cpu")
     elif modelname.startswith('yolo'):
         model, preprocess, classes=create_yolomodel(modelname, num_classes, ckpt_file, fp16, device, scale)
         model= freeze_yolomodel(model, freeze=[])
@@ -227,20 +255,6 @@ def create_detectionmodel(modelname, num_classes=None, nocustomize=False, traina
             model = TorchvisionYoloModel(model_name="yolov8", scale=scale, num_classes=num_classes, device=device)
         preprocess = None  # TorchvisionYoloModel handles preprocessing internally
         classes = None     # Uses COCO classes by default
-    elif modelname.startswith('resnext'):
-        # Use CustomRCNN with ResNeXt backbone
-        backbonename = modelname  # e.g., 'resnext50_32x4d' or 'resnext101_32x8d'
-        model = CustomRCNN(
-            backbone_modulename=backbonename,
-            trainable_layers=trainable_layers,
-            num_classes=num_classes,
-            out_channels=256,
-            min_size=800,
-            max_size=1333
-        )
-        if ckpt_file:
-            model = load_checkpoint(model, ckpt_file, fp16)
-        model.to(device)
     else:
         print('Model name not supported')
 
@@ -254,7 +268,21 @@ def create_detectionmodel(modelname, num_classes=None, nocustomize=False, traina
         ) 
         if device:
             currentdevice=next(model.parameters()).device #simply getting the device name for the first parameter of the nn module
-            model=model.to(device)
+            model=if device == "cpu" or device.type == "cpu":
+    model.to("cpu")
+else:
+    try:
+        if device == "cpu" or device.type == "cpu":
+        model.to("cpu")
+else:
+        try:
+            model.to(device)
+        except:
+            print("Failed to move model to device:", device, "- falling back to CPU")
+            model.to("cpu")
+    except:
+        print("Failed to move model to device:", device, "- falling back to CPU")
+        model.to("cpu")
     return model, preprocess, classes
     
 
