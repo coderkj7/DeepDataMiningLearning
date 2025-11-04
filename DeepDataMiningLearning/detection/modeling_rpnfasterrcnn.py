@@ -24,8 +24,9 @@ from collections import OrderedDict
 from torchvision.models import get_model, get_model_weights, get_weight, list_models
 from torchvision.ops.feature_pyramid_network import ExtraFPNBlock, FeaturePyramidNetwork, LastLevelMaxPool
 #from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from DeepDataMiningLearning.detection.backbone import MyBackboneWithFPN
+from DeepDataMiningLearning.detection.backbone import MyBackboneWithFPN, DINOViTBackbone
 from DeepDataMiningLearning.detection.detectiontransform import DetectionTransform
+
 
 class AnchorGenerator(nn.Module):
     """

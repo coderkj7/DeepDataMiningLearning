@@ -241,6 +241,20 @@ def create_detectionmodel(modelname, num_classes=None, nocustomize=False, traina
         if ckpt_file:
             model = load_checkpoint(model, ckpt_file, fp16)
         model.to(device)
+    elif modelname.startswith('dino'):
+        # Use CustomRCNN with dino backbone
+        backbonename = modelname
+        model = CustomRCNN(
+            backbone_modulename=backbonename,
+            trainable_layers=trainable_layers,
+            num_classes=num_classes,
+            out_channels=256,
+            min_size=800,
+            max_size=1333
+        )
+        if ckpt_file:
+            model = load_checkpoint(model, ckpt_file, fp16)
+        model.to(device)
     else:
         print('Model name not supported')
 
