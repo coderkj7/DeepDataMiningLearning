@@ -1102,8 +1102,10 @@ class CustomRCNN(nn.Module):
         num_classes=None,
         out_channels=256, #FPN output channel
         # transform parameters
-        min_size=800,
-        max_size=1333,
+        # min_size=800,
+        # max_size=1333,
+        min_size=640,
+        max_size=1024,
         image_mean=None,
         image_std=None,
         # RPN parameters
