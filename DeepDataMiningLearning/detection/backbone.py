@@ -55,7 +55,7 @@ class MyBackboneWithFPN(nn.Module):
             
             self.vit_model = torch.hub.load('facebookresearch/dino:main', 'dino_vitb16') 
             self.vit_blocks = self.vit_model.blocks # 12 Transformer Blocks
-            self.adapter = ViTFeatureAdapter(in_dim=768, out_channels_list=[512, 1024, 2048])
+            self.adapter = ViTFeatureAdapter(in_dim=768, out_channels_list=[256, 512, 1024, 2048])
             
             # --- DINO Freezing Logic ---
             for param in self.vit_model.parameters():
@@ -70,7 +70,7 @@ class MyBackboneWithFPN(nn.Module):
                 param.requires_grad = True
 
             # Define the FPN
-            in_channels_list = [512, 1024, 2048] # From adapter
+            in_channels_list = [256, 512, 1024, 2048] # From adapter
             self.fpn = FeaturePyramidNetwork(
                 in_channels_list=in_channels_list,
                 out_channels=self.out_channels,
@@ -185,12 +185,13 @@ class ViTFeatureAdapter(nn.Module):
     The output channels [512, 1024, 2048] are chosen to match the
     in_channels_list that the original ResNet-based FPN expects.
     """
-    def __init__(self, in_dim=768, out_channels_list=[512, 1024, 2048]):
+    def __init__(self, in_dim=768, out_channels_list=[256, 512, 1024, 2048]):
         super().__init__()
         self.patch_size = 16 
         self.in_dim = in_dim
         
         # 1x1 Convs to project 768-dim tokens to the channel sizes FPN expects
+        self.conv_c2 = nn.Conv2d(in_dim, out_channels_list[0], kernel_size=1)
         self.conv_c3 = nn.Conv2d(in_dim, out_channels_list[0], kernel_size=1)
         self.conv_c4 = nn.Conv2d(in_dim, out_channels_list[1], kernel_size=1)
         self.conv_c5 = nn.Conv2d(in_dim, out_channels_list[2], kernel_size=1)
@@ -212,9 +213,12 @@ class ViTFeatureAdapter(nn.Module):
         
         c3_in = F.interpolate(c4_in, size=(H_feat * 4, W_feat * 4), mode='bilinear', align_corners=False)
         c3_out = self.conv_c3(c3_in)
+        
+        c2_in = F.interpolate(c3_in, size=(H_feat * 8, W_feat * 8), mode='bilinear', align_corners=False)
+        c2_out = self.conv_c2(c2_in)
 
         # Return OrderedDict with the same keys as the ResNet path
-        return OrderedDict([('0', c3_out), ('1', c4_out), ('2', c5_out)])
+        return OrderedDict([('0', c2_out), ('1', c3_out), ('2', c4_out), ('3', c5_out)])
 
 
 
