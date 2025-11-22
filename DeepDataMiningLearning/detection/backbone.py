@@ -57,7 +57,7 @@ class MyBackboneWithFPN(nn.Module):
             self.vit_blocks = self.vit_model.blocks # 12 Transformer Blocks
             self.adapter = ViTFeatureAdapter(in_dim=768, out_channels_list=[256, 512, 1024, 2048])
             
-            # --- DINO Freezing Logic ---
+            # DINO Freezing Logic
             for param in self.vit_model.parameters():
                 param.requires_grad = False
             # Unfreeze the last (12 - freeze_blocks) blocks
@@ -124,7 +124,7 @@ class MyBackboneWithFPN(nn.Module):
 
     def forward(self, x: Tensor) -> Dict[str, Tensor]:
         if self.model_name.startswith('dino'):
-            # --- DINO Forward Path ---
+            # DINO Forward Path
             H, W = x.shape[-2], x.shape[-1]
             # 1. Pass through ViT
             tokens = self.vit_model.prepare_tokens(x)
@@ -178,23 +178,6 @@ class MyBackboneWithFPN(nn.Module):
         return body, fpn
 
 
-# class ViTFeatureAdapter(nn.Module):
-#     """
-#     Takes ViT-B/16 (768-dim) tokens and projects them into 2D feature maps
-#     at different scales (C3, C4, C5) to simulate a CNN's hierarchy for the FPN.
-#     The output channels [512, 1024, 2048] are chosen to match the
-#     in_channels_list that the original ResNet-based FPN expects.
-#     """
-#     def __init__(self, in_dim=768, out_channels_list=[256, 512, 1024, 2048]):
-#         super().__init__()
-#         self.patch_size = 16 
-#         self.in_dim = in_dim
-        
-#         # 1x1 Convs to project 768-dim tokens to the channel sizes FPN expects
-#         self.conv_c2 = nn.Conv2d(in_dim, out_channels_list[0], kernel_size=1)
-#         self.conv_c3 = nn.Conv2d(in_dim, out_channels_list[0], kernel_size=1)
-#         self.conv_c4 = nn.Conv2d(in_dim, out_channels_list[1], kernel_size=1)
-#         self.conv_c5 = nn.Conv2d(in_dim, out_channels_list[2], kernel_size=1)
 class ViTFeatureAdapter(nn.Module):
     """
     Adapt DINO ViT-B/16 tokens into a ResNet-FPN-like multi-scale feature pyramid.
@@ -220,7 +203,7 @@ class ViTFeatureAdapter(nn.Module):
         H_feat, W_feat = H // self.patch_size, W // self.patch_size
         x = tokens.transpose(1, 2).reshape(tokens.shape[0], self.in_dim, H_feat, W_feat)
         
-        # --- Create multi-scale feature maps ---
+        # Create multi-scale feature maps
         c5_in = x
         c5_out = self.conv_c5(c5_in)
 
